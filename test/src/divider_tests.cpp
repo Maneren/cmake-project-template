@@ -1,12 +1,12 @@
 //
 // Created by Konstantin Gredeskoul on 5/16/17.
 //
-#include "gtest/gtest.h"
-#include <division.h>
+#include <division/division.h>
+#include <gtest/gtest.h>
 
-using namespace std;
+namespace division {
 
-#define VI vector<long long>
+using VI = std::vector<long long>;
 
 class DividerTest : public ::testing::Test {
 
@@ -21,10 +21,9 @@ protected:
   virtual void TearDown() {};
 
   virtual void verify(int index) {
-    Fraction f = Fraction{numerators.at(index), denominators.at(index)};
-    DivisionResult expected =
-        DivisionResult{divisions.at(index), remainders.at(index)};
-    DivisionResult result = Division(f).divide();
+    const auto f = Fraction{numerators.at(index), denominators.at(index)};
+    const auto expected = Result{divisions.at(index), remainders.at(index)};
+    const auto result = Division(f).divide();
     EXPECT_EQ(result.division, expected.division);
     EXPECT_EQ(result.remainder, expected.remainder);
   }
@@ -39,13 +38,15 @@ TEST_F(DividerTest, 17_DivideBy_19) { verify(2); }
 TEST_F(DividerTest, Long_DivideBy_Long) { verify(3); }
 
 TEST_F(DividerTest, DivisionByZero) {
-  Division d = Division(Fraction{1, 0});
+  const auto d = Division(Fraction{1, 0});
   try {
     d.divide();
     FAIL() << "Expected divide() method to throw DivisionByZeroException";
   } catch (DivisionByZero const &err) {
-    EXPECT_EQ(err.what(), DIVISION_BY_ZERO_MESSAGE);
+    EXPECT_EQ(err.what(), DivisionByZero::MESSAGE);
   } catch (...) {
     FAIL() << "Expected DivisionByZeroException!";
   }
 }
+
+} // namespace division

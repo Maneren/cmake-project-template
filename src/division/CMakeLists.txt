@@ -1,9 +1,11 @@
 cmake_minimum_required(VERSION 3.10)
-project(division C CXX)
+set(LIBRARY division)
+project(${LIBRARY} LANGUAGES CXX)
 
 file(GLOB_RECURSE SOURCE_FILES *.cpp *.h)
 
-add_library(division SHARED STATIC ${SOURCE_FILES})
+add_library(${LIBRARY} SHARED STATIC ${SOURCE_FILES})
 
-install(TARGETS division DESTINATION ${DIVISIBLE_INSTALL_LIB_DIR})
-install(FILES division.h DESTINATION ${DIVISIBLE_INSTALL_INCLUDE_DIR})
+install(TARGETS ${LIBRARY} DESTINATION ${PROJECT_LIB_DIR})
+
+include_directories(../include/)

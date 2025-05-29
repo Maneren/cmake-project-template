@@ -8,7 +8,6 @@ default:
     @just --list
 
 configure build_system="Ninja Multi-Config": clean
-    mkdir -p {{ builddir }}
     cmake -B {{ builddir }} -G "{{ build_system }}"
 
 build config="Debug" target="all":
