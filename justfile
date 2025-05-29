@@ -23,3 +23,7 @@ test config="Debug": (build config "tests")
 
 clean:
     rm -rf build
+
+format:
+    clang-format -i $(find src -type f -name "*.cpp" -or -name "*.h")
+    clang-format -i $(find test -type f -name "*.cpp" -or -name "*.h" -not -path "*/external/*")
