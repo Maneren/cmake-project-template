@@ -1,11 +1,13 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(cmake-project-template)
+set(PROJECT "cmake-project-template")
+project(${PROJECT})
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Set compiler flags for Debug and RelWithDebInfo builds
+# Set compiler flags for Debug, Test and RelWithDebInfo builds
 set(
 	CMAKE_CXX_FLAGS_DEBUG
 	"${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -pedantic -g3 -gdwarf-5 -fno-omit-frame-pointer"
@@ -16,10 +18,11 @@ set(
 )
 
 set(CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR})
+set(CMAKE_INSTALL_MESSAGE LAZY)
 
 set(DIVISIBLE_INSTALL_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include)
-set(DIVISIBLE_INSTALL_BIN_DIR ${PROJECT_SOURCE_DIR}/bin)
-set(DIVISIBLE_INSTALL_LIB_DIR ${PROJECT_SOURCE_DIR}/lib)
+set(DIVISIBLE_INSTALL_BIN_DIR ${PROJECT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE})
+set(DIVISIBLE_INSTALL_LIB_DIR ${PROJECT_SOURCE_DIR}/lib/${CMAKE_BUILD_TYPE})
 
 set(DIVISION_HEADERS_DIR ${PROJECT_SOURCE_DIR}/src/division)
 
