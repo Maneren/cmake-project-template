@@ -1,20 +1,6 @@
 # CMake C++ Project Template with Google-Test Unit Testing Library
 
-> WTF is this?
->
-> I was just starting with C++ and CMake and I was having a hard time building
-> a workable template that had all the pieces I wanted. This project represents
-> a culmination of work to distill down to bare minimum any C/C++ project that
-> wants to have the option to be build via CMake, to install itself as
-> executables, libraries (shared/static), and provides test binaries that can
-> be used to execute unit tests.
->
-> GoogleTest library is a git module, and pulled by the "build-and-run"
-> script `./build-and-run`
-
-### Division with a remainder library
-
-Thank you for your interest in this project!
+## Division with a remainder library
 
 Are you just starting with `CMake` or C++?
 
@@ -30,9 +16,6 @@ it using CMake/make (see below) it generates:
 
 1. A tiny **static library** `lib/libdivision.a`,
 2. **A command line binary `bin/divider`**, which links with the library,
-3. **An executable unit test** `bin/divider_tests` using [Google Test library](https://github.com/google/googletest).
-4. **An optional BASH build script** `build-and-run` that you can use to quickly
-   test if the project compiles, and runs.
 
 ## Usage
 
@@ -53,60 +36,68 @@ First we need to check out the git repo:
 ❯ mkdir ~/workspace
 ❯ cd ~/workspace
 ❯ git clone \
-    https://github.com/kigster/cmake-project-template \
+    https://github.com/Maneren/cmake-project-template \
     my-project
 ❯ cd my-project
-❯ bash build-and-run
 ```
 
-The output of this script is rather long as shown [on this screenshot](doc/build-and-run.png).
+then either install GoogleTest from your favorite package manager (preferably)
+or fetch the git submodule:
 
-The script `build-and-run` is a short-cut — you shouldn't really be using this
-script to build your project, but see how to do it properly below.
+```bash
+❯ git submodule update --init
+```
 
 #### Project Structure
 
 There are three empty folders: `lib`, `bin`, and `include`. Those are populated
-by `make install`.
+by `cmake` when you run `--install`.
 
 The rest should be obvious: `src` is for the source files, and `test` is where
 we put our unit tests.
 
 Now we can build this project, and below we show three separate ways to do so.
 
-#### Building Manually
+#### Building
 
 ```bash
-❯ rm -rf build && mkdir build
-❯ git submodule init && git submodule update
+❯ just configure
 ❯ cd build
 ❯ cmake ..
 ❯ make && make install
 ❯ cd ..
 ```
 
+There is a Just file that simplifies this process.
+
+```bash
+❯ just configure install
+```
+
 #### Running the tests
 
 ```bash
-❯ bin/divider_tests
-[==========] Running 5 tests from 1 test case.
-[----------] Global test environment set-up.
-[----------] 5 tests from DividerTest
-[ RUN      ] DividerTest.5_DivideBy_2
-[       OK ] DividerTest.5_DivideBy_2 (1 ms)
-[ RUN      ] DividerTest.9_DivideBy_3
-[       OK ] DividerTest.9_DivideBy_3 (0 ms)
-[ RUN      ] DividerTest.17_DivideBy_19
-[       OK ] DividerTest.17_DivideBy_19 (0 ms)
-[ RUN      ] DividerTest.Long_DivideBy_Long
-[       OK ] DividerTest.Long_DivideBy_Long (0 ms)
-[ RUN      ] DividerTest.DivisionByZero
-[       OK ] DividerTest.DivisionByZero (0 ms)
-[----------] 5 tests from DividerTest (1 ms total)
+❯ cd build && ctest
+    Start 1: DividerTest.5_DivideBy_2
+1/5 Test #1: DividerTest.5_DivideBy_2 .........   Passed    0.00 sec
+    Start 2: DividerTest.9_DivideBy_3
+2/5 Test #2: DividerTest.9_DivideBy_3 .........   Passed    0.00 sec
+    Start 3: DividerTest.17_DivideBy_19
+3/5 Test #3: DividerTest.17_DivideBy_19 .......   Passed    0.00 sec
+    Start 4: DividerTest.Long_DivideBy_Long
+4/5 Test #4: DividerTest.Long_DivideBy_Long ...   Passed    0.00 sec
+    Start 5: DividerTest.DivisionByZero
+5/5 Test #5: DividerTest.DivisionByZero .......   Passed    0.00 sec
 
-[----------] Global test environment tear-down
-[==========] 5 tests from 1 test case ran. (1 ms total)
-[  PASSED  ] 5 tests.
+100% tests passed, 0 tests failed out of 5
+
+Total Test time (real) =   0.01 sec
+```
+
+Again, with Just it's a one-liner:
+
+```bash
+❯ just test
 ```
 
 #### Running the CLI Executable
@@ -137,6 +128,14 @@ Division : 112443477 / 12309324 = 9
 Remainder: 112443477 % 12309324 = 1659561
 ```
 
+And lastly, with Just it's again as simple as:
+
+```bash
+❯ just run Debug 112443477 12309324
+```
+
+(Debug is the CMake build type, so it can be also Release, RelWithDebInfo or MinSizeRel.)
+
 ### Using it as a C++ Library
 
 We build a static library that, given a simple fraction will return the integer
@@ -145,11 +144,11 @@ result of the division, and the remainder.
 We can use it from C++ like so:
 
 ```cpp
-#include <division>
+#include <division/division.h>
 #include <iostream>
 
-Fraction f = Fraction{25, 7};
-DivisionResult r = Division(f).divide();
+const auto f = division::Fraction{25, 7};
+const auto r = division::Division(f).divide();
 
 std::cout << "Result of the division is " << r.division;
 std::cout << "Remainder of the division is " << r.remainder;
@@ -158,7 +157,7 @@ std::cout << "Remainder of the division is " << r.remainder;
 ## File Locations
 
 - `src/*` — C++ code that ultimately compiles into a library
-- `test/lib` — C++ libraries used for tests (e.g. Google Test)
+- `test/external` — C++ libraries used for tests (e.g. Google Test)
 - `test/src` — C++ test suite
 - `bin/`, `lib`, `include` are all empty directories, until the `make install`
   install the project artifacts there.
@@ -169,27 +168,12 @@ Tests:
   the directory structure of `src`.
 - For every C++ file in `src/A/B/<name>.cpp` there is a corresponding
   test file `test/A/B/<name>_test.cpp`
-- Tests compile into a single binary `test/bin/runner` that is run on
-  a command line to run the tests.
-- `test/lib` folder with a git submodule in `test/lib/googletest`, and possibly
-  other libraries.
-
-## Contributing
-
-**Pull Requests are WELCOME!** Please submit any fixes or improvements, and I
-promise to review it as soon as I can at the project URL:
-
-- [Project Github Home](https://github.com/kigster/cmake-project-template)
-- [Submit Issues](https://github.com/kigster/cmake-project-template/issues)
-- [Pull Requests](https://github.com/kigster/cmake-project-template/pulls)
 
 ## License
 
-&copy; 2017-2019 Konstantin Gredeskoul.
+&copy; 2017-2019 Konstantin Gredeskoul. 2025-present Maneren
 
 Open sourced under MIT license, the terms of which can be read here — [MIT License](http://opensource.org/licenses/MIT).
-
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fkigster%2Fcmake-project-template.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fkigster%2Fcmake-project-template?ref=badge_large)
 
 ## Acknowledgements
 
