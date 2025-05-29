@@ -45,8 +45,6 @@ divider.setup() {
   hl.subtle "Creating Build Folder..."
   run "mkdir -p build/run"
   run "git submodule init && git submodule update"
-
-  [[ -f .idea/workspace.xml ]] || cp .idea/workspace.xml.example .idea/workspace.xml
 }
 
 divider.clean() {
@@ -56,7 +54,7 @@ divider.clean() {
 
 divider.build() {
   run "cd build/run"
-  run "cmake ../.. "
+  run "cmake ../.."
   run.set-next show-output-on
   run "make -j 12"
   run "make install | egrep -v 'gmock|gtest'"

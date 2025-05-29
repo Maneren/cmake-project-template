@@ -1,10 +1,7 @@
-cmake_minimum_required(VERSION 3.2)
+cmake_minimum_required(VERSION 3.10)
 project(division C CXX)
 
-set(SOURCE_FILES
-    division.h
-    division.cpp
-)
+file(GLOB_RECURSE SOURCE_FILES ./*.cpp ./*.h)
 
 add_library(division SHARED STATIC ${SOURCE_FILES})
 

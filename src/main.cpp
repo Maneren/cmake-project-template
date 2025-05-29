@@ -4,7 +4,10 @@
 using namespace std;
 
 static const char *const HEADER = "\nDivider © 2018 Monkey Claps Inc.\n\n";
-static const char *const USAGE = "Usage:\n\tdivider <numerator> <denominator>\n\nDescription:\n\tComputes the result of a fractional division,\n\tand reports both the result and the remainder.\n";
+static const char *const USAGE =
+    "Usage:\n\tdivider <numerator> <denominator>\n\nDescription:\n\tComputes "
+    "the result of a fractional division,\n\tand reports both the result and "
+    "the remainder.\n";
 
 int main(int argc, const char *argv[]) {
   Fraction f;
@@ -24,8 +27,10 @@ int main(int argc, const char *argv[]) {
   try {
     DivisionResult r = d.divide();
 
-    cout << "Division : " << f.numerator << " / " << f.denominator << " = " << r.division << "\n";
-    cout << "Remainder: " << f.numerator << " % " << f.denominator << " = " << r.remainder << "\n";
+    cout << "Division : " << f.numerator << " / " << f.denominator << " = "
+         << r.division << "\n";
+    cout << "Remainder: " << f.numerator << " % " << f.denominator << " = "
+         << r.remainder << "\n";
   } catch (DivisionByZero) {
     cout << "Can not divide by zero, Homer. Sober up!\n";
   }

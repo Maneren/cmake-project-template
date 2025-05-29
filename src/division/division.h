@@ -5,7 +5,8 @@
 #ifndef CMAKE_DIVISION_H
 #define CMAKE_DIVISION_H
 
-static const char *const DIVISION_BY_ZERO_MESSAGE = "Division by zero is illegal";
+static const char *const DIVISION_BY_ZERO_MESSAGE =
+    "Division by zero is illegal";
 
 #include <iostream>
 #include <stdexcept>
@@ -14,9 +15,7 @@ using namespace std;
 
 class DivisionByZero : public exception {
 public:
-  virtual const char *what() const throw() {
-    return DIVISION_BY_ZERO_MESSAGE;
-  }
+  virtual const char *what() const throw() { return DIVISION_BY_ZERO_MESSAGE; }
 };
 
 struct Fraction {
@@ -29,24 +28,22 @@ struct DivisionResult {
   long long remainder;
 
   friend bool operator==(const DivisionResult &lhs, const DivisionResult &rhs) {
-    return lhs.division == rhs.division ? lhs.remainder < rhs.remainder : lhs.division < rhs.division;
+    return lhs.division == rhs.division ? lhs.remainder < rhs.remainder
+                                        : lhs.division < rhs.division;
   }
 };
 
 class Division {
 public:
-  explicit Division(Fraction fraction) {
-    this->fraction = fraction;
-  }
+  explicit Division(Fraction fraction) { this->fraction = fraction; }
 
-  ~Division() {
-  };
+  ~Division() {};
 
   DivisionResult divide();
 
 protected:
-  Fraction       fraction;
+  Fraction fraction;
   DivisionResult result;
 };
 
-#endif //CMAKE_DIVISION_H
+#endif // CMAKE_DIVISION_H
