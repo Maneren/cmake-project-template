@@ -6,6 +6,22 @@ file(GLOB SOURCE_FILES *.cpp)
 add_executable(${EXECUTABLE} ${SOURCE_FILES})
 install(TARGETS ${EXECUTABLE} DESTINATION ${PROJECT_BIN_DIR})
 
+target_compile_options(
+  ${EXECUTABLE}
+  PRIVATE
+  "$<$<NOT:$<CONFIG:RELEASE>>:-fsanitize=address>"
+)
+target_link_options(
+  ${EXECUTABLE}
+  PRIVATE
+  "$<$<NOT:$<CONFIG:RELEASE>>:-fsanitize=address>"
+)
+target_compile_options(
+  ${EXECUTABLE}
+  PRIVATE
+  "$<$<CONFIG:DEBUG,RELWITHDEBINFO>:SHELL:${PROJECT_CXX_FLAGS_WARNINGS}>"
+)
+
 file(GLOB DIRS LIST_DIRECTORIES TRUE ./*)
 foreach(DIR ${DIRS})
   if(EXISTS ${DIR}/CMakeLists.txt)

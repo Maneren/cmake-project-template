@@ -8,14 +8,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Set compiler flags for Debug and RelWithDebInfo builds
-set(
-	CMAKE_CXX_FLAGS_DEBUG
-	"${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -pedantic -g3 -gdwarf-5 -fno-omit-frame-pointer"
-)
-set(
-	CMAKE_CXX_FLAGS_RELWITHDEBINFO
-	"${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -g3 -gdwarf-5 -fno-omit-frame-pointer"
-)
+set(PROJECT_CXX_FLAGS_DEBUGINFO "-g3 -gdwarf-5 -fno-omit-frame-pointer")
+set(PROJECT_CXX_FLAGS_WARNINGS "-Wall -Wextra -pedantic")
 
 set(CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR})
 set(CMAKE_INSTALL_MESSAGE LAZY)

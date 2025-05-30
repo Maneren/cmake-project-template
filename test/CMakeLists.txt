@@ -11,6 +11,22 @@ include_directories(${PROJECT_HEADERS_DIR})
 file(GLOB_RECURSE TEST_FILES main.cpp src/*.cpp src/*.h)
 add_executable(${TEST_EXECUTABLE} EXCLUDE_FROM_ALL ${TEST_FILES})
 
+target_compile_options(
+  ${TEST_EXECUTABLE}
+  PRIVATE
+  "$<$<NOT:$<CONFIG:RELEASE>>:-fsanitize=address>"
+)
+target_link_options(
+  ${TEST_EXECUTABLE}
+  PRIVATE
+  "$<$<NOT:$<CONFIG:RELEASE>>:-fsanitize=address>"
+)
+target_compile_options(
+  ${TEST_EXECUTABLE}
+  PRIVATE
+  "$<$<CONFIG:DEBUG,RELWITHDEBINFO>:SHELL:${PROJECT_CXX_FLAGS_WARNINGS}>"
+)
+
 target_link_libraries(${TEST_EXECUTABLE}
   PRIVATE
     division
