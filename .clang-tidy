@@ -1,0 +1,13 @@
+---
+Checks: >-
+  bugprone-*,
+  clang-analyzer-*,
+  modernize-*,
+  cppcoreguidelines-*,
+  misc-*,
+  readability-*,
+  performance-*,
+  -readability-identifier-length,
+  -modernize-use-trailing-return-type,
+  -cppcoreguidelines-avoid-c-arrays
+FormatStyle: file

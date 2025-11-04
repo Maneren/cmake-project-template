@@ -1,57 +1,12 @@
-cmake_minimum_required(VERSION 3.10)
+include(${CMAKE_SOURCE_DIR}/cmake/TestTemplate.cmake)
 
-set(TEST_EXECUTABLE ${PROJECT}_tests)
-
-project(${TEST_EXECUTABLE} LANGUAGES CXX)
-
-add_custom_target(tests ${CMAKE_CTEST_COMMAND} DEPENDS ${PROJECT}_tests)
-
-include_directories(${PROJECT_HEADERS_DIR})
-
-file(GLOB_RECURSE TEST_FILES main.cpp src/*.cpp src/*.h)
-add_executable(${TEST_EXECUTABLE} EXCLUDE_FROM_ALL ${TEST_FILES})
-
-target_compile_options(
-  ${TEST_EXECUTABLE}
-  PRIVATE
-  "$<$<NOT:$<CONFIG:RELEASE>>:-fsanitize=address>"
-)
-target_link_options(
-  ${TEST_EXECUTABLE}
-  PRIVATE
-  "$<$<NOT:$<CONFIG:RELEASE>>:-fsanitize=address>"
-)
-target_compile_options(
-  ${TEST_EXECUTABLE}
-  PRIVATE
-  "$<$<CONFIG:DEBUG,RELWITHDEBINFO>:SHELL:${PROJECT_CXX_FLAGS_WARNINGS}>"
+add_custom_target(tests
+    COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure --parallel
+    DEPENDS all_tests
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    COMMENT "Running all tests"
 )
 
-target_link_libraries(${TEST_EXECUTABLE}
-  PRIVATE
-    division
-)
+add_custom_target(all_tests)
 
-find_package(GTest QUIET)
-
-if(TARGET GTest::GTest)
-  target_link_libraries(${TEST_EXECUTABLE}
-    PRIVATE
-      GTest::GTest
-      GTest::Main
-  )
-elseif(EXISTS ./test/external/googletest/CMakeLists.txt)
-  add_subdirectory(external/googletest EXCLUDE_FROM_ALL)
-  include_directories(external/googletest/googletest/include)
-  add_dependencies(${TEST_EXECUTABLE} gtest)
-  target_link_libraries(${TEST_EXECUTABLE} PRIVATE gtest)
-else()
-  message(
-    FATAL_ERROR
-    "Could not find googletest, try installing it or running
-      'git submodule update --init --recursive'"
-  )
-endif()
-
-include(GoogleTest)
-gtest_discover_tests(${PROJECT}_tests)
+add_subdirectory(unit)

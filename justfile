@@ -1,7 +1,18 @@
 root := justfile_directory()
 builddir := root / "build"
-executable := "divider"
 export CMAKE_EXPORT_COMPILE_COMMANDS := "1"
+
+# executable to use for `just run`
+
+executable := "divider"
+
+# Print stdout and stderr on failed tests
+
+export CTEST_OUTPUT_ON_FAILURE := "1"
+
+# Number of threads to use for running tests (0 is auto)
+
+export CTEST_PARALLEL_LEVEL := "0"
 
 [private]
 default:
@@ -13,17 +24,16 @@ configure build_system="Ninja Multi-Config": clean
 build config="Debug" target="all":
     cmake --build {{ builddir }} --config {{ config }} --target {{ target }}
 
-install config="Debug": (build config)
-    cmake --install {{ builddir }} --config {{ config }}
-
-run config="Debug" +args="": (install config)
-    {{ root }}/bin/{{ executable }} {{ args }}
+run config="Debug" +args="": (build config executable)
+    '{{ builddir }}/bin/{{ config }}/{{ executable }}' {{ args }}
 
 test config="Debug": (build config "tests")
 
 clean:
     rm -rf build
 
+lint:
+    clang-tidy -p {{ builddir }} --quiet $(find src test -type f -name "*.cpp" -or -name "*.h" -not -path "*/external/*")
+
 format:
-    clang-format -i $(find src -type f -name "*.cpp" -or -name "*.h")
-    clang-format -i $(find test -type f -name "*.cpp" -or -name "*.h" -not -path "*/external/*")
+    clang-format -i $(find src test -type f -name "*.cpp" -or -name "*.h" -not -path "*/external/*")

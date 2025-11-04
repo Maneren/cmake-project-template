@@ -1,37 +1,21 @@
-cmake_minimum_required(VERSION 3.10)
-set(EXECUTABLE divider)
-project(${EXECUTABLE} LANGUAGES CXX)
+# Handle external dependencies first
+set(EXPECTED_BUILD_TESTS OFF)
+set(EXPECTED_BUILD_PACKAGE OFF)
 
-file(GLOB SOURCE_FILES *.cpp)
-add_executable(${EXECUTABLE} ${SOURCE_FILES})
-install(TARGETS ${EXECUTABLE} DESTINATION ${PROJECT_BIN_DIR})
+# Add external dependencies
+add_subdirectory(external)
 
-target_compile_options(
-  ${EXECUTABLE}
-  PRIVATE
-  "$<$<NOT:$<CONFIG:RELEASE>>:-fsanitize=address>"
-)
-target_link_options(
-  ${EXECUTABLE}
-  PRIVATE
-  "$<$<NOT:$<CONFIG:RELEASE>>:-fsanitize=address>"
-)
-target_compile_options(
-  ${EXECUTABLE}
-  PRIVATE
-  "$<$<CONFIG:DEBUG,RELWITHDEBINFO>:SHELL:${PROJECT_CXX_FLAGS_WARNINGS}>"
-)
-
-file(GLOB DIRS LIST_DIRECTORIES TRUE ./*)
-foreach(DIR ${DIRS})
-  if(EXISTS ${DIR}/CMakeLists.txt)
-    add_subdirectory(${DIR})
-    get_filename_component(lib_name ${DIR} NAME)
-    target_link_libraries(${EXECUTABLE} PRIVATE ${lib_name})
-  endif()
+# Auto-discover and build all library subdirectories
+file(GLOB LIB_DIRS LIST_DIRECTORIES TRUE ./*)
+foreach(DIR ${LIB_DIRS})
+    get_filename_component(DIR_NAME ${DIR} NAME)
+    if(IS_DIRECTORY ${DIR} AND EXISTS ${DIR}/CMakeLists.txt AND NOT DIR_NAME STREQUAL "external")
+        add_subdirectory(${DIR})
+    endif()
 endforeach()
 
+# Install headers
 file(GLOB INCLUDE_DIRS LIST_DIRECTORIES TRUE include/*)
-install(DIRECTORY ${INCLUDE_DIRS} DESTINATION ${PROJECT_INCLUDE_DIR})
-
-include_directories(include)
+if(INCLUDE_DIRS)
+    install(DIRECTORY ${INCLUDE_DIRS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+endif()

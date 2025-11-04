@@ -1,7 +1,5 @@
 # CMake C++ Project Template with Google-Test Unit Testing Library
 
-## Division with a remainder library
-
 Are you just starting with `CMake` or C++?
 
 Do you need some easy-to-use starting point, but one that has the basic moving
@@ -11,24 +9,26 @@ Do you believe in test-driven development, or at the very least — write your
 tests _together_ with the feature code? If so you'd want to start your project
 pre-integrated with a good testing framework.
 
-Divider is a minimal project that's kept deliberately very small. When you build
-it using CMake/make (see below) it generates:
+## Division with a remainder library
+
+Divider is a minimal project that's kept deliberately small. It is used to
+showcase various parts of the CMake template. When you build it using CMake/make
+(see below) it generates:
 
 1. A tiny **static library** `lib/libdivision.a`,
 2. **A command line binary `bin/divider`**, which links with the library,
 
-## Usage
+## Using the template
 
 ### Prerequisites
 
 You will need:
 
-- A modern C/C++ compiler
-- CMake 3.10+ installed (on a Mac, run `brew install cmake`)
+- A modern C++ compiler in the `CXX` environment variable
+- [`cmake`](https://cmake.org/) version 3.25+
+- optionally also the [`just`](https://github.com/casey/just) command runner
 
-### Building The Project
-
-#### Git Clone
+### Git Clone
 
 First we need to check out the git repo:
 
@@ -48,33 +48,37 @@ or fetch the git submodule:
 ❯ git submodule update --init
 ```
 
-#### Project Structure
+### Project Structure
 
-There are three empty folders: `lib`, `bin`, and `include`. Those are populated
-by `cmake` when you run `--install`.
+The project source files are split into 3 folders:
 
-The rest should be obvious: `src` is for the source files, and `test` is where
-we put our unit tests.
+- `src` contains the library code
+  - here should be the bulk of the logic, classes, etc.
+- `apps` contains the application code
+  - here should be the frontend and the main function
+- `test` contains the tests
 
-Now we can build this project, and below we show three separate ways to do so.
+More on specific subfolders in [[#project-structure]].
 
-#### Building
+### Building
 
 ```bash
-❯ just configure
+❯ mkdir build
 ❯ cd build
 ❯ cmake ..
 ❯ make && make install
 ❯ cd ..
 ```
 
-There is a Just file that simplifies this process.
+There is a Justfile that simplifies this process. It uses (opinionated)
+recommended defaults – Ninja Multi-Config generator and clang++ compiler.
 
 ```bash
-❯ just configure install
+❯ just configure
+❯ just build [Debug|Release|RelWithDebInfo|MinSizeRel] [target]
 ```
 
-#### Running the tests
+### Running the tests
 
 ```bash
 ❯ cd build && ctest
@@ -100,7 +104,7 @@ Again, with Just it's a one-liner:
 ❯ just test
 ```
 
-#### Running the CLI Executable
+### Running the CLI Executable
 
 Without arguments, it prints out its usage:
 
@@ -120,7 +124,7 @@ Description:
 But with arguments, it computes as expected the denominator:
 
 ```bash
-❯ bin/divider 112443477 12309324
+❯ build/bin/Debug/divider 112443477 12309324
 
 Divider © 2018 Monkey Claps Inc.
 
@@ -131,10 +135,11 @@ Remainder: 112443477 % 12309324 = 1659561
 And lastly, with Just it's again as simple as:
 
 ```bash
-❯ just run Debug 112443477 12309324
+❯ just run [Debug|Release|RelWithDebInfo|MinSizeRel] [...args]
 ```
 
-(Debug is the CMake build type, so it can be also Release, RelWithDebInfo or MinSizeRel.)
+Debug is the CMake build type, so it can be also Release, RelWithDebInfo or
+MinSizeRel.
 
 ### Using it as a C++ Library
 
@@ -147,7 +152,7 @@ We can use it from C++ like so:
 #include <division/division.h>
 #include <iostream>
 
-const auto f = division::Fraction{25, 7};
+const auto f = division::Fraction{.numerator = 25, .denominator = 7};
 const auto r = division::Division(f).divide();
 
 std::cout << "Result of the division is " << r.division;
@@ -156,18 +161,25 @@ std::cout << "Remainder of the division is " << r.remainder;
 
 ## File Locations
 
-- `src/*` — C++ code that ultimately compiles into a library
-- `test/external` — C++ libraries used for tests (e.g. Google Test)
-- `test/src` — C++ test suite
-- `bin/`, `lib`, `include` are all empty directories, until the `make install`
-  install the project artifacts there.
+- `src` – library code
+  - `external` – external libraries
+  - `*` – individual project libraries
+    - `src` – private source files
+    - `include/*` – public headers
+- `apps` - aapplication code
+  - `*` - individual project applications
+    - `src` - source files
+- `test`
+  - `external` – external libraries used for tests (e.g. Google Test)
+  - `unit` – unit tests
+    - `*` – unit tests for each library
+      - `**/*.cpp` – should mirror corresponding source files
+    - `CMakeLists.txt` – add unit tests to this file
+  - `*` – other test types (e.g. integration, end-to-end, etc.)
+    - structure should mirror that of `test/unit`
+    - add this subfolder to `test/CMakeLists.txt`
 
-Tests:
-
-- A `test` folder with the automated tests and fixtures that mimics
-  the directory structure of `src`.
-- For every C++ file in `src/A/B/<name>.cpp` there is a corresponding
-  test file `test/A/B/<name>_test.cpp`
+Read through the sample divider project to understand the details.
 
 ## License
 
