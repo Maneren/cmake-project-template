@@ -9,6 +9,11 @@ Do you believe in test-driven development, or at the very least — write your
 tests _together_ with the feature code? If so you'd want to start your project
 pre-integrated with a good testing framework.
 
+> [!NOTE]
+>
+> This template is mainly focused on Unix-like systems. It should work on
+> Windows as well, but it is not guaranteed.
+
 ## Division with a remainder library
 
 Divider is a minimal project that's kept deliberately small. It is used to
@@ -26,7 +31,9 @@ You will need:
 
 - A modern C++ compiler in the `CXX` environment variable
 - [`cmake`](https://cmake.org/) version 3.25+
-- optionally also the [`just`](https://github.com/casey/just) command runner
+- optionally, it's recommended to also have
+  - the [`just`](https://github.com/casey/just) command runner
+  - [`ninja`](https://ninja-build.org/)
 
 ### Git Clone
 
@@ -180,6 +187,27 @@ std::cout << "Remainder of the division is " << r.remainder;
     - add this subfolder to `test/CMakeLists.txt`
 
 Read through the sample divider project to understand the details.
+
+## Flags
+
+The template by default sets the following compiler flags:
+
+- for all build configurations
+  - `-std=c++${DEFAULT_CXX_STD}` – specify C++ standard
+  - `-Wall -Wextra -Wpedantic` – enable as many warnings as possible
+- for `Debug` build configurations
+  - `-g3 -gdwarf-5` – enable debug information in the Dwarf format
+  - `-Og` – enable optimizations that improve debug information
+  - `-fno-omit-frame-pointer` – enable frame pointer for better debugging
+  - `-fsanitize=address,undefined,leak,bounds,signed-integer-overflow`
+    - use all basic sanitizers for runtime safety checking (modern replacement
+      for `valgrind` memcheck)
+- for `Release` build configurations
+  - `-O3` – enable aggressive optimizations
+  - `-flto` – link-time optimization
+
+Add additional flags with `CMAKE_CXX_FLAGS` or `CMAKE_CXX_FLAGS_${BUILD_TYPE}`
+and other common environment variables.
 
 ## License
 
