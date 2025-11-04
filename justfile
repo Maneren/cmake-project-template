@@ -18,8 +18,8 @@ export CTEST_PARALLEL_LEVEL := "0"
 default:
     @just --list
 
-configure build_system="Ninja Multi-Config": clean
-    cmake -B {{ builddir }} -G "{{ build_system }}"
+configure build_system="Ninja Multi-Config" +args="": clean
+    cmake -B {{ builddir }} -G "{{ build_system }}" {{ args }}
 
 build config="Debug" target="all":
     cmake --build {{ builddir }} --config {{ config }} --target {{ target }}

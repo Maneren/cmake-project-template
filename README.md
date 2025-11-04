@@ -185,6 +185,7 @@ std::cout << "Remainder of the division is " << r.remainder;
   - `*` – other test types (e.g. integration, end-to-end, etc.)
     - structure should mirror that of `test/unit`
     - add this subfolder to `test/CMakeLists.txt`
+- `cmake` – CMake helpers
 
 Read through the sample divider project to understand the details.
 
@@ -195,19 +196,23 @@ The template by default sets the following compiler flags:
 - for all build configurations
   - `-std=c++${DEFAULT_CXX_STD}` – specify C++ standard
   - `-Wall -Wextra -Wpedantic` – enable as many warnings as possible
-- for `Debug` build configurations
-  - `-g3 -gdwarf-5` – enable debug information in the Dwarf format
-  - `-Og` – enable optimizations that improve debug information
-  - `-fno-omit-frame-pointer` – enable frame pointer for better debugging
+- for `Debug` build configuration
+  - `-Og` – enable a few optimizations that improve debug information
   - `-fsanitize=address,undefined,leak,bounds,signed-integer-overflow`
     - use all basic sanitizers for runtime safety checking (modern replacement
       for `valgrind` memcheck)
-- for `Release` build configurations
+- for `Debug` and `RelWithDebInfo` build configurations
+  - `-g3 -gdwarf-5` – enable debug information in the Dwarf format
+  - `-fno-omit-frame-pointer` – enable frame pointer for better debugging
+- for `Release` and `RelWithDebInfo` build configurations
   - `-O3` – enable aggressive optimizations
   - `-flto` – link-time optimization
 
-Add additional flags with `CMAKE_CXX_FLAGS` or `CMAKE_CXX_FLAGS_${BUILD_TYPE}`
-and other common environment variables.
+You can add additional flags with `CMAKE_CXX_FLAGS` or
+`CMAKE_CXX_FLAGS_${BUILD_TYPE}` and other common environment variables.
+
+For more info see the `cmake/CommonUtils.cmake` file, where they are set, and
+`build/compile_commands.json`, where the effective compilation commands are.
 
 ## License
 
