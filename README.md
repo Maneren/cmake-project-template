@@ -69,20 +69,31 @@ More on specific subfolders in [[#project-structure]].
 
 ### Building
 
-```bash
-❯ mkdir build
-❯ cd build
-❯ cmake ..
-❯ make && make install
-❯ cd ..
-```
+Building is done with CMake in two steps:
+
+1. Configure
+
+   ```bash
+   mkdir build
+   cd build
+   cmake ..
+   ```
+
+2. Build
+
+   (still in the `build` folder)
+
+   ```bash
+   make
+   ```
 
 There is a Justfile that simplifies this process. It uses (opinionated)
-recommended defaults – Ninja Multi-Config generator and clang++ compiler.
+recommended defaults – Ninja Multi-Config generator and clang++ compiler
+(those can be overridden in the Justfile).
 
 ```bash
-❯ just configure
-❯ just build [Debug|Release|RelWithDebInfo|MinSizeRel] [target]
+just configure
+just build [Debug|Release|RelWithDebInfo|MinSizeRel] [target]
 ```
 
 ### Running the tests
@@ -108,7 +119,7 @@ Total Test time (real) =   0.01 sec
 Again, with Just it's a one-liner:
 
 ```bash
-❯ just test
+just test
 ```
 
 ### Running the CLI Executable
@@ -142,7 +153,7 @@ Remainder: 112443477 % 12309324 = 1659561
 And lastly, with Just it's again as simple as:
 
 ```bash
-❯ just run [Debug|Release|RelWithDebInfo|MinSizeRel] [...args]
+just run [Debug|Release|RelWithDebInfo|MinSizeRel] [...args]
 ```
 
 Debug is the CMake build type, so it can be also Release, RelWithDebInfo or
@@ -166,6 +177,42 @@ std::cout << "Result of the division is " << r.division;
 std::cout << "Remainder of the division is " << r.remainder;
 ```
 
+### Adding new parts
+
+The template automatically recognizes new files and subfolders with source files
+but when adding a more significant part of the project, like a new application
+or library (both internal and external), you have to reconfigure the project.
+
+This is done similarly to the initial build:
+
+```bash
+cd build
+cmake ..
+```
+
+or with Just:
+
+```bash
+just configure
+```
+
+### Clean build
+
+When encountering issues with CMake or compilation, first try clean building:
+
+```bash
+rm -rf build
+mkdir build
+cd build
+cmake ..
+```
+
+or
+
+```bash
+just clean configure
+```
+
 ## File Locations
 
 - `src` – library code
@@ -173,7 +220,7 @@ std::cout << "Remainder of the division is " << r.remainder;
   - `*` – individual project libraries
     - `src` – private source files
     - `include/*` – public headers
-- `apps` - aapplication code
+- `apps` - application code
   - `*` - individual project applications
     - `src` - source files
 - `test`

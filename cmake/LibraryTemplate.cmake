@@ -62,8 +62,8 @@ endfunction()
 
 function(auto_create_library TARGET)
     cmake_parse_arguments(AUTO "" "" "EXCLUDE_PATTERNS" ${ARGN})
-    file(GLOB_RECURSE SOURCES src/*.cpp src/*.c src/*.cxx src/*.cc)
-    file(GLOB_RECURSE HEADERS include/*.h include/*.hpp include/*.hxx)
+    file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/*.cpp src/*.c src/*.cxx src/*.cc)
+    file(GLOB_RECURSE HEADERS CONFIGURE_DEPENDS include/*.h include/*.hpp include/*.hxx)
 
     foreach(pattern ${AUTO_EXCLUDE_PATTERNS})
         list(FILTER SOURCES EXCLUDE REGEX ${pattern})

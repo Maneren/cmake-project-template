@@ -10,7 +10,7 @@ function(create_test_executable TARGET)
     )
 
     if(NOT TEST_SOURCES)
-        file(GLOB_RECURSE TEST_SOURCES *.cpp *.c)
+        file(GLOB_RECURSE TEST_SOURCES CONFIGURE_DEPENDS *.cpp *.c)
         if(NOT TEST_SOURCES)
             message(FATAL_ERROR "No test sources for ${TARGET}")
         endif()

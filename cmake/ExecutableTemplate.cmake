@@ -45,6 +45,6 @@ function(create_executable TARGET SOURCES)
 endfunction()
 
 function(auto_create_executable TARGET)
-    file(GLOB_RECURSE SOURCES src/*.cpp src/*.c src/*.cxx src/*.cc src/*.h src/*.hpp src/*.hxx)
+    file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/*.cpp src/*.c src/*.cxx src/*.cc src/*.h src/*.hpp src/*.hxx)
     create_executable(${TARGET} "${SOURCES}" ${ARGN})
 endfunction()
