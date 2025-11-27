@@ -18,9 +18,7 @@ function(set_compiler_and_linker_flags TARGET)
     endif()
 
     set(CXX_GNU_DEBUG_INFO -g3 -gdwarf-5 -fno-omit-frame-pointer)
-    set(CXX_SANITIZERS
-        -fsanitize=address,undefined,leak,bounds,signed-integer-overflow
-    )
+    set(CXX_SANITIZERS -fsanitize=address,undefined,leak)
 
     target_compile_options(${TARGET} PRIVATE
         $<$<CONFIG:Debug>:$<$<CXX_COMPILER_ID:GNU,Clang>:-Og>>
