@@ -1,4 +1,4 @@
-#include <division/division.h>
+module division;
 
 namespace division {
 

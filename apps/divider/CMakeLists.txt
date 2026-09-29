@@ -4,5 +4,5 @@ auto_create_executable(
     CONSOLE
     OUTPUT_NAME "divider"
     VERSION 1.0.0
-    CXX_STD 23
+    CXX_STD 26
 )

@@ -34,8 +34,8 @@ clean:
     rm -rf build
 
 lint:
-    clang-tidy -p {{ builddir }} --quiet $(find src apps test -type f \( -name "*.cpp" -or -name "*.h" -or -name "*.hpp" \) -not -path "*/external/*")
+    clang-tidy -p {{ builddir }} --quiet $(find src apps test -type f \( -name "*.cpp" -or -name "*.cppm" -or -name "*.h" -or -name "*.hpp" \) -not -path "*/external/*")
 
 format:
-    clang-format -i $(find src apps test -type f \( -name "*.cpp" -or -name "*.h" -or -name "*.hpp" \) -not -path "*/external/*")
+    clang-format -i $(find src apps test -type f \( -name "*.cpp" -or -name "*.cppm" -or -name "*.h" -or -name "*.hpp" \) -not -path "*/external/*")
     gersemi -i . --definitions cmake --no-cache

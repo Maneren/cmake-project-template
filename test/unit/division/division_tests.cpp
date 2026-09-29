@@ -1,10 +1,11 @@
 //
 // Created by Konstantin Gredeskoul on 5/16/17.
 //
-#include <array>
-#include <cstddef>
-#include <division/division.h>
 #include <gtest/gtest.h>
+
+import std;
+
+import division;
 
 namespace division {
 

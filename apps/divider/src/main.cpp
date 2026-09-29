@@ -1,5 +1,6 @@
-#include <division/division.h>
-#include <iostream>
+import std;
+
+import division;
 
 static const char *const HEADER = "\nDivider © 2018 Monkey Claps Inc.\n\n";
 static const char *const USAGE =
@@ -18,8 +19,8 @@ int main(int argc, const char *argv[]) {
     return 1;
   }
 
-  f.numerator = atoll(argv[1]);
-  f.denominator = atoll(argv[2]);
+  f.numerator = std::atoll(argv[1]);
+  f.denominator = std::atoll(argv[2]);
 
   const auto d = division::Division(f);
   try {

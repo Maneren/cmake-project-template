@@ -5,11 +5,11 @@ function(create_library TARGET)
         LIB
         "STATIC;SHARED;OBJECT;INTERFACE"
         "VERSION;CXX_STD;HEADER_BASE_DIR"
-        "PRIVATE_DEPS;PUBLIC_DEPS;INTERFACE_DEPS;HEADERS;SOURCES"
+        "PRIVATE_DEPS;PUBLIC_DEPS;INTERFACE_DEPS;HEADERS;MODULES;SOURCES"
         ${ARGN}
     )
 
-    if(NOT LIB_INTERFACE AND NOT LIB_SOURCES)
+    if(NOT LIB_INTERFACE AND NOT LIB_SOURCES AND NOT LIB_MODULES)
         message(
             FATAL_ERROR
             "Library ${TARGET} has no sources but is not header-only"
@@ -27,6 +27,13 @@ function(create_library TARGET)
         add_library(${TARGET} STATIC ${LIB_SOURCES})
     else()
         add_library(${TARGET} ${LIB_SOURCES})
+    endif()
+
+    if(LIB_MODULES)
+        target_sources(
+            ${TARGET}
+            PUBLIC FILE_SET CXX_MODULES FILES ${LIB_MODULES}
+        )
     endif()
 
     if(LIB_HEADERS)
@@ -75,12 +82,19 @@ function(auto_create_library TARGET)
         LIB
         "STATIC;SHARED;OBJECT;INTERFACE"
         "VERSION;CXX_STD;HEADER_BASE_DIR"
-        "PRIVATE_DEPS;PUBLIC_DEPS;INTERFACE_DEPS;HEADERS;SOURCES"
+        "PRIVATE_DEPS;PUBLIC_DEPS;INTERFACE_DEPS;HEADERS;MODULES;SOURCES"
         ${ARGN}
     )
 
     file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/*.cpp src/*.cxx src/*.cc)
+    file(GLOB_RECURSE MODULES CONFIGURE_DEPENDS src/*.cppm)
     file(GLOB_RECURSE HEADERS CONFIGURE_DEPENDS include/*.h include/*.hpp)
 
-    create_library(${TARGET} ${ARGN} SOURCES "${SOURCES}" HEADERS "${HEADERS}")
+    create_library(
+        ${TARGET}
+        ${ARGN}
+        SOURCES "${SOURCES}"
+        MODULES "${MODULES}"
+        HEADERS "${HEADERS}"
+    )
 endfunction()

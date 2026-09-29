@@ -1,14 +1,13 @@
-#pragma once
+export module division;
 
-#include <exception>
-#include <string_view>
+import std;
 
-namespace division {
+export namespace division {
 
 class DivisionByZero : public std::exception {
 public:
   static constexpr std::string_view MESSAGE = "Division by zero is illegal";
-  virtual const char *what() const throw() { return MESSAGE.data(); }
+  const char *what() const noexcept override { return MESSAGE.data(); }
 };
 
 struct Fraction {

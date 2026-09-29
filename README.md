@@ -18,11 +18,26 @@ This template is maintained in two variants:
 
 - `main` – traditional headers (`src/*/include`, `#include`), works with any
   recent compiler.
-- `modules` – C++20/23 named modules (`.cppm` + `import`), requires CMake
-  3.31+, Ninja, and a compiler with module + `import std` support
-  (e.g. GCC 16+).
+- `modules` – C++ named modules (`.cppm` + `import`), requires CMake 3.31+,
+  Ninja, and a compiler with module + `import std` support (e.g. GCC 16+).
+  **You are on this branch.**
 
 ## Division with a remainder library
+
+On this branch the `division` library is a named C++ module:
+
+```cpp
+import division;
+
+const auto f = division::Fraction{.numerator = 25, .denominator = 7};
+const auto r = division::Division(f).divide();
+```
+
+Module interfaces live in `src/<lib>/src/*.cppm` (`export module <lib>;`)
+with implementations in matching `.cpp` files (`module <lib>;`). The standard
+library is consumed with `import std;`. Targets using modules set
+`CXX_STD 26`; header-only targets (e.g. `src/utils`) keep working unchanged
+alongside them.
 
 Divider is a minimal project that's kept deliberately small. It is used to
 showcase various parts of the CMake template. When you build it using CMake/make
@@ -38,6 +53,8 @@ showcase various parts of the CMake template. When you build it using CMake/make
 You will need:
 
 - A modern C++ compiler in the `CXX` environment variable
+  - on this branch: GCC 16+ (for `import std`) or an equivalent
+    modules-capable setup
 - [`cmake`](https://cmake.org/) version 3.31+
 - [`ninja`](https://ninja-build.org/) (required for the default
   `Ninja Multi-Config` generator)
@@ -173,8 +190,8 @@ result of the division, and the remainder.
 We can use it from C++ like so:
 
 ```cpp
-#include <division/division.h>
-#include <iostream>
+import division;
+import std;
 
 const auto f = division::Fraction{.numerator = 25, .denominator = 7};
 const auto r = division::Division(f).divide();
@@ -224,8 +241,9 @@ just clean configure
 - `src` – library code
   - `external` – external libraries
   - `*` – individual project libraries
-    - `src` – private source files
-    - `include/*` – public headers
+    - `src` – private source files (`.cpp` implementations, `.cppm` module
+      interfaces)
+    - `include/*` – public headers (only for targets that still use them)
 - `apps` - application code
   - `*` - individual project applications
     - `src` - source files
@@ -251,8 +269,8 @@ The template by default sets the following compiler flags
 (see `cmake/CommonUtils.cmake`):
 
 - for all build configurations
-  - `-std=c++<CXX_STD>` (`CXX_STD` is set per target, 23 in this template) –
-    specify C++ standard
+  - `-std=c++<CXX_STD>` (`CXX_STD` is set per target, 26 for the module
+    targets in this template) – specify C++ standard
   - `-Wall -Wextra -Wpedantic -Wconversion` – enable as many warnings as
     possible
 - for `Debug` build configuration
@@ -285,7 +303,7 @@ Libraries, executables and tests are declared through small wrappers:
 # src/<lib>/CMakeLists.txt — sources/headers are globbed automatically
 auto_create_library(<lib>
   STATIC|SHARED|OBJECT|INTERFACE  # default: static
-  CXX_STD <std>                   # e.g. 23; no global default
+  CXX_STD <std>                   # e.g. 26; no global default
   PRIVATE_DEPS <libs...>          # link privately
   PUBLIC_DEPS <libs...>           # link publicly
   INTERFACE_DEPS <libs...>        # header-only deps
