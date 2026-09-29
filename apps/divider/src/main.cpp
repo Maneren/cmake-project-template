@@ -29,7 +29,7 @@ int main(int argc, const char *argv[]) {
               << r.division << "\n";
     std::cout << "Remainder: " << f.numerator << " % " << f.denominator << " = "
               << r.remainder << "\n";
-  } catch (division::DivisionByZero) {
+  } catch (const division::DivisionByZero &) {
     std::cout << "Can not divide by zero, Homer. Sober up!\n";
   }
   return 0;
