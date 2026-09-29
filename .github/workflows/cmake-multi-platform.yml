@@ -2,9 +2,9 @@ name: CMake on multiple platforms
 
 on:
   push:
-    branches: ["master"]
+    branches: ["main", "modules"]
   pull_request:
-    branches: ["master"]
+    branches: ["main", "modules"]
 
 jobs:
   build:
@@ -32,17 +32,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: recursive
       - name: Set reusable strings
         id: strings
         shell: bash
         run: |
           echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
-          
+
       - name: Setup Just
         uses: extractions/setup-just@v2
-        
+
       - name: Configure via Just
         run: >
           just configure "Ninja Multi-Config"\

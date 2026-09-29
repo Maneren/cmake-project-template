@@ -1,15 +1,16 @@
 include(${CMAKE_CURRENT_LIST_DIR}/CommonUtils.cmake)
 
 function(create_executable TARGET SOURCES)
-    cmake_parse_arguments(EXE
+    cmake_parse_arguments(
+        EXE
         "CONSOLE;GUI;TEST"
         "VERSION;OUTPUT_NAME;CXX_STD"
-        "PRIVATE_DEPS;COMPILE_DEFS;INCLUDE_DIRS"
+        "DEPENDS;COMPILE_DEFS;INCLUDE_DIRS"
         ${ARGN}
     )
 
     if(SOURCES)
-        if (EXE_TEST)
+        if(EXE_TEST)
             add_executable(${TARGET} EXCLUDE_FROM_ALL "${SOURCES}")
         else()
             add_executable(${TARGET} "${SOURCES}")
@@ -19,9 +20,9 @@ function(create_executable TARGET SOURCES)
     endif()
 
     add_include_directories(${TARGET} PRIVATE "${EXE_INCLUDE_DIRS}")
-    set_compiler_and_linker_flags(${TARGET} ${EXE_TEST} ${EXE_CXX_STD})
+    set_compiler_and_linker_flags(${TARGET} ${EXE_TEST} CXX_STD ${EXE_CXX_STD})
     target_compile_definitions(${TARGET} PRIVATE "${EXE_COMPILE_DEFS}")
-    link_dependencies(${TARGET} PRIVATE "${EXE_PRIVATE_DEPS}")
+    target_link_libraries(${TARGET} PRIVATE "${EXE_DEPENDS}")
 
     if(EXE_TEST)
         set_output_directories(${TARGET} TEST)
@@ -30,7 +31,10 @@ function(create_executable TARGET SOURCES)
     endif()
 
     if(EXE_OUTPUT_NAME)
-        set_target_properties(${TARGET} PROPERTIES OUTPUT_NAME ${EXE_OUTPUT_NAME})
+        set_target_properties(
+            ${TARGET}
+            PROPERTIES OUTPUT_NAME ${EXE_OUTPUT_NAME}
+        )
     endif()
 
     set_version_properties(${TARGET} "${EXE_VERSION}")
@@ -45,6 +49,28 @@ function(create_executable TARGET SOURCES)
 endfunction()
 
 function(auto_create_executable TARGET)
-    file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/*.cpp src/*.c src/*.cxx src/*.cc src/*.h src/*.hpp src/*.hxx)
+    # NOTE: all arguments are forwarded to create_executable() verbatim via
+    # ARGN. This parse only declares the accepted keywords (for reference and
+    # for formatters); its results are intentionally unused.
+    cmake_parse_arguments(
+        EXE
+        "CONSOLE;GUI;TEST"
+        "VERSION;OUTPUT_NAME;CXX_STD"
+        "DEPENDS;COMPILE_DEFS;INCLUDE_DIRS"
+        ${ARGN}
+    )
+
+    file(
+        GLOB_RECURSE SOURCES
+        CONFIGURE_DEPENDS
+        src/*.cpp
+        src/*.c
+        src/*.cxx
+        src/*.cc
+        src/*.h
+        src/*.hpp
+        src/*.hxx
+    )
+
     create_executable(${TARGET} "${SOURCES}" ${ARGN})
 endfunction()

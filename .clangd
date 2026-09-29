@@ -1,0 +1,29 @@
+---
+Index:
+  Background: Build
+
+Style:
+  AngledHeaders: [".*/external/.*", ".*/include/.*"]
+
+Completion:
+  AllScopes: true
+  ArgumentLists: Delimiters
+  HeaderInsertion: Never
+  CodePatterns: All
+  MacroFilter: ExactPrefix
+InlayHints:
+  BlockEnd: false
+  Designators: true
+  Enabled: true
+  ParameterNames: true
+  DeducedTypes: true
+  DefaultArguments: true
+  TypeNameLimit: 24
+Hover:
+  ShowAKA: true
+  MacroContentsLimit: 2048
+Documentation:
+  CommentFormat: Doxygen
+Diagnostics:
+  UnusedIncludes: Strict
+  MissingIncludes: None

@@ -9,5 +9,6 @@ Checks: >-
   performance-*,
   -readability-identifier-length,
   -modernize-use-trailing-return-type,
-  -cppcoreguidelines-avoid-c-arrays
+  -cppcoreguidelines-avoid-c-arrays,
+  -misc-no-recursion,
 FormatStyle: file

@@ -9,7 +9,11 @@ add_subdirectory(external)
 file(GLOB LIB_DIRS LIST_DIRECTORIES TRUE ./*)
 foreach(DIR ${LIB_DIRS})
     get_filename_component(DIR_NAME ${DIR} NAME)
-    if(IS_DIRECTORY ${DIR} AND EXISTS ${DIR}/CMakeLists.txt AND NOT DIR_NAME STREQUAL "external")
+    if(
+        IS_DIRECTORY ${DIR}
+        AND EXISTS ${DIR}/CMakeLists.txt
+        AND NOT DIR_NAME STREQUAL "external"
+    )
         add_subdirectory(${DIR})
     endif()
 endforeach()

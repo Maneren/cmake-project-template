@@ -1,7 +1,8 @@
 include(${CMAKE_SOURCE_DIR}/cmake/TestTemplate.cmake)
 
-add_custom_target(tests
-    COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure --parallel
+add_custom_target(
+    tests
+    COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure --parallel -C $<CONFIG>
     DEPENDS all_tests
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     COMMENT "Running all tests"

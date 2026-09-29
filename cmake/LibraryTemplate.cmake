@@ -1,78 +1,86 @@
 include(${CMAKE_CURRENT_LIST_DIR}/CommonUtils.cmake)
 
-function(create_library TARGET SOURCES HEADERS)
-    cmake_parse_arguments(LIB
-        "STATIC;SHARED;HEADER_ONLY"
-        "VERSION;NAMESPACE;CXX_STD"
-        "PRIVATE_DEPS;PUBLIC_DEPS;INTERFACE_DEPS;COMPILE_DEFS;INCLUDE_DIRS"
+function(create_library TARGET)
+    cmake_parse_arguments(
+        LIB
+        "STATIC;SHARED;OBJECT;INTERFACE"
+        "VERSION;CXX_STD;HEADER_BASE_DIR"
+        "PRIVATE_DEPS;PUBLIC_DEPS;INTERFACE_DEPS;HEADERS;SOURCES"
         ${ARGN}
     )
 
-    if(NOT LIB_CXX_STD)
-        set(LIB_CXX_STD ${DEFAULT_CXX_STD})
+    if(NOT LIB_INTERFACE AND NOT LIB_SOURCES)
+        message(
+            FATAL_ERROR
+            "Library ${TARGET} has no sources but is not header-only"
+        )
     endif()
 
-    if(LIB_NAMESPACE)
-        set(TARGET "${LIB_NAMESPACE}::${TARGET}")
-    endif()
-
-    if(LIB_HEADER_ONLY)
+    if(LIB_INTERFACE)
         add_library(${TARGET} INTERFACE)
-        set(VISIBILITY INTERFACE)
     elseif(LIB_SHARED)
-        add_library(${TARGET} SHARED ${SOURCES})
-        set(VISIBILITY PUBLIC)
+        add_library(${TARGET} SHARED ${LIB_SOURCES})
+        set_target_properties(${TARGET} PROPERTIES POSITION_INDEPENDENT_CODE ON)
+    elseif(LIB_OBJECT)
+        add_library(${TARGET} OBJECT ${LIB_SOURCES})
+    elseif(LIB_STATIC)
+        add_library(${TARGET} STATIC ${LIB_SOURCES})
     else()
-        add_library(${TARGET} STATIC ${SOURCES})
-        set(VISIBILITY PUBLIC)
+        add_library(${TARGET} ${LIB_SOURCES})
     endif()
 
-    target_include_directories(${TARGET} ${VISIBILITY}
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:include>)
+    if(LIB_HEADERS)
+        if(NOT LIB_HEADER_BASE_DIR)
+            set(LIB_HEADER_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
+        endif()
 
-    if(NOT LIB_HEADER_ONLY)
-        target_include_directories(${TARGET} PRIVATE
-            ${CMAKE_CURRENT_SOURCE_DIR}/src)
+        target_sources(
+            ${TARGET}
+            PUBLIC
+                FILE_SET HEADERS
+                    BASE_DIRS ${LIB_HEADER_BASE_DIR}
+                    FILES ${LIB_HEADERS}
+        )
+    endif()
 
-        set_compiler_and_linker_flags(${TARGET} OFF ${LIB_CXX_STD})
+    if(LIB_INTERFACE)
+        if(LIB_PRIVATE_DEPS OR LIB_PUBLIC_DEPS)
+            message(
+                FATAL_ERROR
+                "Header-only '${TARGET}' may only have interface dependencies"
+            )
+        endif()
+        target_link_libraries(${TARGET} INTERFACE "${LIB_INTERFACE_DEPS}")
+    else()
+        target_link_libraries(
+            ${TARGET}
+            PUBLIC "${LIB_PUBLIC_DEPS}"
+            INTERFACE "${LIB_INTERFACE_DEPS}"
+            PRIVATE "${LIB_PRIVATE_DEPS}"
+        )
+
+        set_compiler_and_linker_flags(${TARGET} CXX_STD ${LIB_CXX_STD})
 
         set_target_properties(${TARGET} PROPERTIES OUTPUT_NAME ${TARGET})
         set_output_directories(${TARGET} LIBRARY)
         set_version_properties(${TARGET} "${LIB_VERSION}")
     endif()
-
-    add_include_directories(${TARGET} PRIVATE "${LIB_INCLUDE_DIRS}")
-
-    link_dependencies(${TARGET} INTERFACE "${LIB_INTERFACE_DEPS}")
-    if(LIB_HEADER_ONLY)
-        link_dependencies(${TARGET} INTERFACE "${LIB_PUBLIC_DEPS}")
-        target_compile_definitions(${TARGET} INTERFACE "${LIB_COMPILE_DEFS}")
-        target_compile_features(${TARGET} INTERFACE cxx_std_${LIB_CXX_STD})
-    else()
-        link_dependencies(${TARGET} PUBLIC "${LIB_PUBLIC_DEPS}")
-        link_dependencies(${TARGET} PRIVATE "${LIB_PRIVATE_DEPS}")
-        target_compile_definitions(${TARGET} PRIVATE "${LIB_COMPILE_DEFS}")
-    endif()
-
-    if(LIB_SHARED)
-        set_target_properties(${TARGET} PROPERTIES POSITION_INDEPENDENT_CODE ON)
-    endif()
 endfunction()
 
 function(auto_create_library TARGET)
-    cmake_parse_arguments(AUTO "" "" "EXCLUDE_PATTERNS" ${ARGN})
-    file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/*.cpp src/*.c src/*.cxx src/*.cc)
-    file(GLOB_RECURSE HEADERS CONFIGURE_DEPENDS include/*.h include/*.hpp include/*.hxx)
+    # NOTE: all arguments are forwarded to create_library() verbatim via ARGN.
+    # This parse only declares the accepted keywords (for reference and for
+    # formatters); its results are intentionally unused.
+    cmake_parse_arguments(
+        LIB
+        "STATIC;SHARED;OBJECT;INTERFACE"
+        "VERSION;CXX_STD;HEADER_BASE_DIR"
+        "PRIVATE_DEPS;PUBLIC_DEPS;INTERFACE_DEPS;HEADERS;SOURCES"
+        ${ARGN}
+    )
 
-    foreach(pattern ${AUTO_EXCLUDE_PATTERNS})
-        list(FILTER SOURCES EXCLUDE REGEX ${pattern})
-        list(FILTER HEADERS EXCLUDE REGEX ${pattern})
-    endforeach()
+    file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/*.cpp src/*.cxx src/*.cc)
+    file(GLOB_RECURSE HEADERS CONFIGURE_DEPENDS include/*.h include/*.hpp)
 
-    if(NOT SOURCES AND HEADERS)
-        create_library(${TARGET} "" "${HEADERS}" HEADER_ONLY ${ARGN})
-    else()
-        create_library(${TARGET} "${SOURCES}" "${HEADERS}" ${ARGN})
-    endif()
+    create_library(${TARGET} ${ARGN} SOURCES "${SOURCES}" HEADERS "${HEADERS}")
 endfunction()

@@ -2,6 +2,8 @@
 # Recursively add all top-level CMakeLists.txt for each library (this is to
 # handle libraries with root CMakeLists.txt in a subdirectory)
 file(GLOB_RECURSE EXTERNAL_CMAKE_FILES */CMakeLists.txt)
+
+include(FetchContent)
 set(PROCESSED_DIRS "")
 foreach(CMAKE_FILE ${EXTERNAL_CMAKE_FILES})
     get_filename_component(DIR ${CMAKE_FILE} DIRECTORY)
@@ -22,3 +24,5 @@ foreach(CMAKE_FILE ${EXTERNAL_CMAKE_FILES})
         list(APPEND PROCESSED_DIRS ${DIR})
     endif()
 endforeach()
+
+FetchContent_MakeAvailable(GTest)

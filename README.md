@@ -14,6 +14,14 @@ pre-integrated with a good testing framework.
 > This template is mainly focused on Unix-like systems. It should work on
 > Windows as well, but it is not guaranteed.
 
+This template is maintained in two variants:
+
+- `main` – traditional headers (`src/*/include`, `#include`), works with any
+  recent compiler.
+- `modules` – C++20/23 named modules (`.cppm` + `import`), requires CMake
+  3.31+, Ninja, and a compiler with module + `import std` support
+  (e.g. GCC 16+).
+
 ## Division with a remainder library
 
 Divider is a minimal project that's kept deliberately small. It is used to
@@ -30,10 +38,11 @@ showcase various parts of the CMake template. When you build it using CMake/make
 You will need:
 
 - A modern C++ compiler in the `CXX` environment variable
-- [`cmake`](https://cmake.org/) version 3.25+
+- [`cmake`](https://cmake.org/) version 3.31+
+- [`ninja`](https://ninja-build.org/) (required for the default
+  `Ninja Multi-Config` generator)
 - optionally, it's recommended to also have
   - the [`just`](https://github.com/casey/just) command runner
-  - [`ninja`](https://ninja-build.org/)
 
 ### Git Clone
 
@@ -48,12 +57,9 @@ First we need to check out the git repo:
 ❯ cd my-project
 ```
 
-then either install GoogleTest from your favorite package manager (preferably)
-or fetch the git submodule:
-
-```bash
-❯ git submodule update --init
-```
+GoogleTest is picked up automatically: a system installation is used when
+available, otherwise it is fetched with CMake's `FetchContent`
+(see `src/external/gtest/CMakeLists.txt`). No manual steps are needed.
 
 ### Project Structure
 
@@ -224,7 +230,6 @@ just clean configure
   - `*` - individual project applications
     - `src` - source files
 - `test`
-  - `external` – external libraries used for tests (e.g. Google Test)
   - `unit` – unit tests
     - `*` – unit tests for each library
       - `**/*.cpp` – should mirror corresponding source files
@@ -233,33 +238,92 @@ just clean configure
     - structure should mirror that of `test/unit`
     - add this subfolder to `test/CMakeLists.txt`
 - `cmake` – CMake helpers
+  - `LibraryTemplate.cmake` – `create_library` / `auto_create_library`
+  - `ExecutableTemplate.cmake` – `create_executable` / `auto_create_executable`
+  - `TestTemplate.cmake` – `create_test_executable` (GoogleTest based)
+  - `CommonUtils.cmake` – shared compiler/linker flags and helpers
 
 Read through the sample divider project to understand the details.
 
 ## Flags
 
-The template by default sets the following compiler flags:
+The template by default sets the following compiler flags
+(see `cmake/CommonUtils.cmake`):
 
 - for all build configurations
-  - `-std=c++${DEFAULT_CXX_STD}` – specify C++ standard
-  - `-Wall -Wextra -Wpedantic` – enable as many warnings as possible
+  - `-std=c++<CXX_STD>` (`CXX_STD` is set per target, 23 in this template) –
+    specify C++ standard
+  - `-Wall -Wextra -Wpedantic -Wconversion` – enable as many warnings as
+    possible
 - for `Debug` build configuration
   - `-Og` – enable a few optimizations that improve debug information
-  - `-fsanitize=address,undefined,leak,bounds,signed-integer-overflow`
-    - use all basic sanitizers for runtime safety checking (modern replacement
-      for `valgrind` memcheck)
+  - optionally `-fsanitize=address,undefined,leak` when configured with
+    `-DSANITIZERS=ON` (modern replacement for `valgrind` memcheck)
 - for `Debug` and `RelWithDebInfo` build configurations
   - `-g3 -gdwarf-5` – enable debug information in the Dwarf format
   - `-fno-omit-frame-pointer` – enable frame pointer for better debugging
 - for `Release` and `RelWithDebInfo` build configurations
   - `-O3` – enable aggressive optimizations
-  - `-flto` – link-time optimization
+
+Interprocedural optimization (LTO) is enabled by default via
+`CMAKE_INTERPROCEDURAL_OPTIMIZATION` (disable with `-DUSE_IPO=OFF`).
+Libraries are created as thin archives by default (disable with
+`-DTHIN_ARCHIVE=OFF`). `ccache`/`sccache` support is available with
+`-DUSE_CCACHE=ON`.
 
 You can add additional flags with `CMAKE_CXX_FLAGS` or
 `CMAKE_CXX_FLAGS_${BUILD_TYPE}` and other common environment variables.
 
 For more info see the `cmake/CommonUtils.cmake` file, where they are set, and
 `build/compile_commands.json`, where the effective compilation commands are.
+
+## CMake helper interface
+
+Libraries, executables and tests are declared through small wrappers:
+
+```cmake
+# src/<lib>/CMakeLists.txt — sources/headers are globbed automatically
+auto_create_library(<lib>
+  STATIC|SHARED|OBJECT|INTERFACE  # default: static
+  CXX_STD <std>                   # e.g. 23; no global default
+  PRIVATE_DEPS <libs...>          # link privately
+  PUBLIC_DEPS <libs...>           # link publicly
+  INTERFACE_DEPS <libs...>        # header-only deps
+)
+
+# apps/<app>/CMakeLists.txt
+auto_create_executable(<app>
+  DEPENDS <libs...>
+  CONSOLE|GUI
+  OUTPUT_NAME "<name>"
+  VERSION <version>
+  CXX_STD <std>
+)
+
+# test/unit/CMakeLists.txt
+create_test_executable(<name_tests>
+  SOURCES <dir>/<tests>.cpp
+  DEPENDS <libs...>
+  CXX_STD <std>
+)
+add_dependencies(all_tests <name_tests>)
+```
+
+Public headers live in `src/<lib>/include/` and are attached with
+`FILE_SET HEADERS`, so consumers automatically get the right include paths.
+
+## Formatting
+
+C++ sources follow the LLVM-based `.clang-format` style, CMake files are
+formatted with [gersemi](https://github.com/BlankSpruce/gersemi). Run both
+with:
+
+```bash
+just format
+```
+
+which executes `clang-format -i` on the sources and
+`gersemi -i . --definitions cmake --no-cache` on the CMake files.
 
 ## License
 

@@ -1,7 +1,8 @@
-create_test_executable(division_tests
+create_test_executable(
+    division_tests
     SOURCES division/division_tests.cpp
-    PRIVATE_DEPS division
-    GTEST
+    DEPENDS division
+    CXX_STD 23
 )
 
 add_dependencies(all_tests division_tests)
